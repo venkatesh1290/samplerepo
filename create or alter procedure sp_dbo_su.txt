@@ -1,0 +1,32 @@
+create or alter procedure sp_dbo_suppliers
+as 
+begin 
+SET NOCOUNT ON;
+MERGE INTO [dbo].[Suppliers] AS target
+USING [STG].[Suppliers] AS source
+ON target.SupplierID = source.SupplierID and RecordStatus = 'active'
+WHEN MATCHED THEN
+    UPDATE SET 
+        target.RecordStatus = 'inactive',
+        target.ModifiedDate = GETDATE();
+MERGE INTO [dbo].[Suppliers] AS target
+USING [STG].[Suppliers] AS source
+ON target.SupplierID = source.SupplierID and RecordStatus = 'active'
+WHEN NOT MATCHED THEN
+    INSERT (SupplierID, SupplierName,ContactName,Country,ModifiedDate, CreatedDate, RecordStatus)
+    VALUES (source.SupplierID, source.SupplierName,source.ContactName,source.Country,GETDATE(), GETDATE(), 'active');
+	SET NOCOUNT OFF;
+end
+exec sp_dbo_suppliers 
+select * from [dbo].[Suppliers] 
+
+sp_dbo_categories,
+sp_dbo_customers,
+sp_dbo_orderdetails,
+sp_dbo_orders,
+sp_dbo_products,
+sp_dbo_suppliers
+
+
+
+
